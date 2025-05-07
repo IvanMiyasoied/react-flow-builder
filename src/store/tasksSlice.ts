@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
 import { Node, Edge, applyNodeChanges, applyEdgeChanges }  from '@xyflow/react'
+import { style } from 'd3-selection';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface TaskState {
@@ -10,22 +10,25 @@ export interface TaskState {
 }
 
 const initialState: TaskState = {
-    nodes:[{ id: '1', position: { x: 0, y: 0 }, data: { label: 'Зробити ревью' },type: 'taskNode' }],
+    nodes:[{ id: '1', position: { x: 0, y: 0 }, data: { label: 'Твоя нова задача!' },type: 'taskNode', style: {width:'150px'} }],
     edges:[]
 }
 
 export const taskSlice = createSlice({
   name: 'task',
-  initialState,
+  initialState: localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks') as string ): initialState,
   reducers: {
     setNode: (state) => {
-        state.nodes.push({ id:uuidv4(), position: { x: 0, y: 200 }, data: { label: 'Gadf' }, type: 'taskNode' })
+        const lastNode = state.nodes[state.nodes.length-1] 
+        state.nodes.push({ id:uuidv4(), position: { x: lastNode.position.x+200,y: lastNode.position.y }, data: { label: 'Твоя нова задача!' }, type: 'taskNode',style : {width:'150px'} })
     },
     onNodesChange: (state,action) => {
         state.nodes = applyNodeChanges(action.payload,state.nodes)
+        localStorage.setItem('tasks',JSON.stringify(state))
     },
     onEdgesChange: (state,action) => {
         state.edges = applyEdgeChanges(action.payload,state.edges)
+        localStorage.setItem('tasks',JSON.stringify(state))
     },
     setEdge: (state,action) => {
         state.edges = action.payload
